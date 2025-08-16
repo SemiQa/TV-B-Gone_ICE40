@@ -1,0 +1,35 @@
+# 12 MHz clock (from Pico)
+set_io clk_ext          35
+
+# UART (connected to Pico)
+set_io uart_rx          27
+set_io uart_tx          25
+
+# Onboard LEDs
+set_io led_blue         39
+set_io led_green        40
+set_io led_red          41
+
+# LEDs
+set_io ir_led_out       32
+set_io active_led_out  	28
+set_io fail_led_out		43
+
+# Button
+set_io button_in        23
+
+# Free
+# set_io 	42
+# set_io 	31
+# set_io 	38
+# set_io    36
+
+# additional io / debug / trace
+set_io trace_7_out      3
+set_io trace_6_out      4
+set_io trace_5_out      48
+set_io trace_4_out      2
+set_io trace_3_out      46
+set_io trace_2_out      47
+set_io trace_1_out      44
+set_io trace_0_out      45
