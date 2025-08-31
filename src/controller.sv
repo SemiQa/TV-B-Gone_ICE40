@@ -48,7 +48,7 @@ wire [2:0] index_bits_num;
 
 assign frequency = header_r[HEADER_FREQUENCY_INDEX];
 assign chirps_num = header_r[HEADER_CHIRPS_INDEX];
-assign words_num = header_r[HEADER_COMPRESSION_INDEX][4:0];
+assign words_num = header_r[HEADER_COMPRESSION_INDEX][7:3];
 assign index_bits_num = header_r[HEADER_COMPRESSION_INDEX][2:0];
 /*
 // function to reset header array
