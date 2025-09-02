@@ -25,6 +25,10 @@ module pico_ice (
 	output trace_0_out
 );
 
+	assign led_red = 1;
+	assign led_green = 1;
+	assign led_blue = 1;
+
     wire clk_24M;
     SB_HFOSC #(.CLKHF_DIV("0b01")) inthosc(.CLKHFPU(1'b1), .CLKHFEN(1'b1), .CLKHF(clk_24M));		// 24MHz internal osc.
 
@@ -58,37 +62,22 @@ module pico_ice (
 		end
 	end
 
-	// TODO: should be finally 4096 + 4096 + 77
-	reg [7:0] rom [4095:0];
-	initial begin
-		$readmemh("../rom/ROM_123_hex.mem", rom, 0, 4095);
-	end
+	tv_b_gone tv_gone (
+		.clock_in (clk_8M),      	// clock
 
-	wire [11:0] rom_address;
-	wire [7:0] rom_byte;
-	always @(*) begin
-		rom_byte <= rom[rom_address[11:0]];
-	end;
+    	.reset_in(!resetn),      	// resets internals (synchronous)
 
-	controller tvbgone_ctrl(
-		.clock_in(clk_8M),      	// clock
+    	.start_in(!button_in),     	// starts working when high (synchroous)
 
-		.reset_in(!resetn),      	// resets internal counter (synchronous)
+    	.busy_out(active_led_out), 	// still working when high
+    	.fail_out(fail_led_out),   	// failure when high
 
-		// TODO: add debouncing for button
-		.startn_in(button_in),      // starts working when low (synchroous)
-
-		// memory interface
-		.data_in(rom_byte),
-		.address_out(rom_address),
-
-		.pwm_out(ir_led_out),        // pwm output
-
-		.busy_out(active_led_out),      // still working when high
-		.fail_out(fail_led_out)       // failure when high
+    	.pwm_out(ir_led_out)		// PWM for IR LED
 	);
 
 	wire [7:0] trace_out;
 	assign trace_out[7:0] = {trace_7_out, trace_6_out, trace_5_out, trace_4_out, trace_3_out, trace_2_out, trace_1_out, trace_0_out};
+
+	assign trace_out[7:0] = 8'b00;
 
 endmodule
