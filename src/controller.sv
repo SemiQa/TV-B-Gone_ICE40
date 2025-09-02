@@ -175,10 +175,14 @@ always @(posedge clock_in) begin
             S_READ_HEADER: begin
                 header_r[byte_counter_r] <= mem_data_in;
                 if (byte_counter_r == 0) begin
-                    index_extended_bit_address_r <= {header_chirps_address_r + 1 + {pair_num, 2'b00}, 3'b000};
-                    chirps_counter_r <= chirps_num - 1;
-                    header_chirps_address_r = header_chirps_address_r + 1;
-                    state_r <= S_READ_INDEX;
+                    if ((header_r[2] | header_r[1]) == 8'h00) begin
+                        state_r <= S_RESET;
+                    end else begin
+                        index_extended_bit_address_r <= {header_chirps_address_r + 1 + {pair_num, 2'b00}, 3'b000};
+                        chirps_counter_r <= chirps_num - 1;
+                        header_chirps_address_r = header_chirps_address_r + 1;
+                        state_r <= S_READ_INDEX;
+                    end
                 end else begin
                     header_chirps_address_r = header_chirps_address_r + 1;
                     byte_counter_r = byte_counter_r - 1;
