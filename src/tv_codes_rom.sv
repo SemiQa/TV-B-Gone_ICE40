@@ -2,9 +2,9 @@
 
 module tv_codes_rom
 #(
-    parameter SIZE = 1000,
+    parameter SIZE = 5320,
     parameter DATA_WIDTH = 8,
-    parameter INIT_FILE = "../rom/tv_codes_rom.mif",
+    parameter INIT_FILE = "../rom/eu_tv_codes_rom.mif",
     localparam ADDRESS_BITS = $clog2(SIZE)
 )
 (
