@@ -34,7 +34,7 @@ always @(posedge clock_in) begin
         out <= 0;
     end else if (enable_in) begin
         if (counter_r == ocr_r) begin
-            out <= ~pwm_out;
+            out <= ~out;
             counter_r <= 0;
         end else begin
             counter_r <= counter_r + 1;
