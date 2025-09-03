@@ -15,10 +15,10 @@ module tv_b_gone (
     output  bit  busy_out,      // still working when high
     output  bit  fail_out,      // failure when high
 
-    output  bit  pwm_out
+    output  bit  ctc_out
 );
 
-    localparam PWM_WIDTH = 8;
+    localparam CTC_WIDTH = 8;
     localparam DELAY_WIDTH = 16;
 
 	wire [12:0] rom_address;
@@ -30,26 +30,25 @@ module tv_b_gone (
     	.address_overflow()
 	);
 
-    wire pwm_enable;
-	wire pwm_forced_out;
-    wire pwm_wr_strobe;
-    wire [PWM_WIDTH-1:0] pwm_value;
-    wire pwm_ack;
+    wire ctc_enable;
+	wire ctc_forced_out;
+    wire ctc_wr_strobe;
+    wire [CTC_WIDTH-1:0] ctc_value;
 
-	pwm_generator 
+	ctc_generator 
     #(
-        .WIDTH(PWM_WIDTH)
-    ) pwm (
+        .WIDTH(CTC_WIDTH)
+    ) ctc (
 		.clock_in(clock_in),      					// clock
 
 		.reset_in(reset_in),      					// resets counter and output when driven high (synchronous)
-		.enable_in(pwm_enable),     				// PWM generated when high
-		.forced_in(pwm_forced_out),					// output state to be forced when not enabled
+		.enable_in(ctc_enable),     				// CTC generated when high
+		.forced_in(ctc_forced_out),					// output state to be forced when not enabled
 
-		.compare_value_in(pwm_value),   			// PWM period in counts
-		.update_comp_value_in(pwm_wr_strobe),      	// write enable, active high (synchronous)
+		.compare_value_in(ctc_value),   			// CTC half-period in counts
+		.update_comp_value_in(ctc_wr_strobe),      	// write enable, active high (synchronous)
 
-		.pwm_out(pwm_out)        					// PWM output
+		.ctc_out(ctc_out)        					// CTC output
 	);
 
     wire delay_enable;
@@ -86,12 +85,11 @@ module tv_b_gone (
 		.mem_address_out(rom_address),
 		.mem_data_in(rom_data),
 		
-		// PWM generator interface
-		.pwm_enable_out(pwm_enable),
-		.pwm_forced_out(pwm_forced_out),
-		.pwm_wr_strobe_out(pwm_wr_strobe),
-		.pwm_value_out(pwm_value),
-		.pwm_wr_ack_in(pwm_ack),
+		// CTC generator interface
+		.ctc_enable_out(ctc_enable),
+		.ctc_forced_out(ctc_forced_out),
+		.ctc_wr_strobe_out(ctc_wr_strobe),
+		.ctc_value_out(ctc_value),
 
 		// delay interface
 		.delay_enable_out(delay_enable),

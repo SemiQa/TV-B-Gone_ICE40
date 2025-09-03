@@ -72,7 +72,7 @@ module pico_ice (
     	.busy_out(active_led_out), 	// still working when high
     	.fail_out(fail_led_out),   	// failure when high
 
-    	.pwm_out(ir_led_out)		// PWM for IR LED
+    	.ctc_out(ir_led_out)		// control for IR LED
 	);
 
 	wire [7:0] trace_out;

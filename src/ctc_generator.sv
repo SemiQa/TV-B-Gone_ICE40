@@ -5,7 +5,7 @@
 
 `default_nettype none
 
-module pwm_generator 
+module ctc_generator 
 #(
     parameter WIDTH = 8
 )
@@ -13,13 +13,13 @@ module pwm_generator
     input   bit  clock_in,      // clock
 
     input   bit  reset_in,      // resets counter and output when driven high (synchronous)
-    input   bit  enable_in,     // PWM generated when high
+    input   bit  enable_in,     // CTC generated when high
     input   bit  forced_in,     // output state to be forced when not enabled
 
-    input   bit  [WIDTH-1:0] compare_value_in,   // PWM period in counts
+    input   bit  [WIDTH-1:0] compare_value_in,   // CTC half-period in counts
     input   bit  update_comp_value_in,           // write enable, active high (synchronous)
 
-    output  bit  pwm_out        // PWM output
+    output  bit  ctc_out        // CTC output
 );
 
 reg [WIDTH-1:0] counter_r;
@@ -45,6 +45,6 @@ always @(posedge clock_in) begin
     end
 end
 
-assign pwm_out = enable_in ? out : forced_in;
+assign ctc_out = enable_in ? out : forced_in;
 
 endmodule

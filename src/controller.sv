@@ -11,7 +11,7 @@ module controller
     parameter UNIT_COUNTS_US = 10,
     parameter CLK_MHZ = 8,
     parameter DELAY_BITS = 16,
-    parameter PWM_BITS = 8
+    parameter CTC_BITS = 8
 )
 (
     input   bit  clock_in,      // clock
@@ -26,12 +26,11 @@ module controller
     output  bit [ADDRESS_BITS-1:0] mem_address_out,
     input   bit [7:0] mem_data_in,
     
-    // PWM generator interface
-    output  bit pwm_enable_out,
-    output  bit pwm_forced_out,
-    output  bit pwm_wr_strobe_out,
-    output  bit [PWM_BITS-1:0] pwm_value_out,
-    input   bit pwm_wr_ack_in,
+    // CTC generator interface
+    output  bit ctc_enable_out,
+    output  bit ctc_forced_out,
+    output  bit ctc_wr_strobe_out,
+    output  bit [CTC_BITS-1:0] ctc_value_out,
 
     // delay interface
     output  bit delay_enable_out,
@@ -280,9 +279,9 @@ assign delay_enable_out = (state_r == S_CARRIER_ON) || (state_r == S_CARRIER_OFF
 assign delay_start_strobe_out = delay_start_r;
 assign delay_value_out = delay_on_off_r;
 
-assign pwm_enable_out = (frequency != 0) && (state_r == S_CARRIER_ON);
-assign pwm_forced_out = (frequency == 0) && (state_r == S_CARRIER_ON);
-assign pwm_value_out = frequency;
-assign pwm_wr_strobe_out = (state_r == S_READ_INDEX);
+assign ctc_enable_out = (frequency != 0) && (state_r == S_CARRIER_ON);
+assign ctc_forced_out = (frequency == 0) && (state_r == S_CARRIER_ON);
+assign ctc_value_out = frequency;
+assign ctc_wr_strobe_out = (state_r == S_READ_INDEX);
 
 endmodule
