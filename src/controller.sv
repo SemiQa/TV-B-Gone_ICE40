@@ -35,7 +35,7 @@ module controller
 
     // delay interface
     output  bit delay_enable_out,
-    output  reg delay_start_strobe_out,
+    output  bit delay_start_strobe_out,
     output  bit [DELAY_BITS-1:0] delay_value_out,
     input   bit delay_busy_in
 );
@@ -81,16 +81,13 @@ typedef enum {
 e_state state_r;
 
 
-// stores header address or chirps pairs array starting address
+// stores header bytes current address or chirps pairs array starting address, depending on state
 reg [ADDRESS_BITS-1:0] header_chirps_address_r;
-// stores index address -> it's byte address of index + additional bits (index is 2 or 3 bit wide)
-reg [ADDRESS_BITS+MAX_INDEX_BITS-1:0] index_extended_bit_address_r;
 
-wire [MAX_INDEX_BITS-1:0] index_bit_group_offset;
-assign index_bit_group_offset = index_extended_bit_address_r[MAX_INDEX_BITS-1:0];
-
-wire [ADDRESS_BITS-1:0] index_byte_address;
-assign index_byte_address = index_extended_bit_address_r[ADDRESS_BITS-1:MAX_INDEX_BITS];
+// index byte address
+reg [ADDRESS_BITS-1:0] index_byte_address_r;
+// index bit address (index is packed, using only 2,3,4 bits)
+reg [MAX_INDEX_BITS-1:0] index_bit_offset_r;
 
 reg [7:0] index_byte_n0_r;
 reg [7:0] index_byte_n1_r;
@@ -102,14 +99,14 @@ wire [MAX_INDEX_BITS-1:0] chirp_delta;
 always @(*) begin
     case (index_bits_num) 
         4: begin
-            case (index_bit_group_offset[MAX_INDEX_BITS-1]) 
+            case (index_bit_offset_r[MAX_INDEX_BITS-1]) 
                 0:  begin chirp_pair_index <= index_byte_n0_r[7:4]; read_next_index_byte = 0; end
                 1:  begin chirp_pair_index <= index_byte_n0_r[3:0]; read_next_index_byte = 1; end
             endcase
             chirp_delta <= 3'b100;
         end
         3: begin
-            case (index_bit_group_offset[MAX_INDEX_BITS-1:0])
+            case (index_bit_offset_r[MAX_INDEX_BITS-1:0])
                 0:  begin chirp_pair_index <= index_byte_n0_r[7:5]; read_next_index_byte = 0; end
                 1:  begin chirp_pair_index <= index_byte_n0_r[4:2]; read_next_index_byte = 1; end
                 2:  begin chirp_pair_index <= {index_byte_n0_r[1:0], index_byte_n1_r[7]}; read_next_index_byte = 0; end
@@ -122,7 +119,7 @@ always @(*) begin
             chirp_delta <= 3'b001;
         end
         2: begin
-            case (index_bit_group_offset[MAX_INDEX_BITS-1:1]) 
+            case (index_bit_offset_r[MAX_INDEX_BITS-1:1]) 
                 0:  begin chirp_pair_index <= index_byte_n0_r[7:6]; read_next_index_byte = 0; end
                 1:  begin chirp_pair_index <= index_byte_n0_r[5:4]; read_next_index_byte = 0; end
                 2:  begin chirp_pair_index <= index_byte_n0_r[3:2]; read_next_index_byte = 0; end
@@ -136,15 +133,14 @@ always @(*) begin
     endcase
 end
 
-// wire [HEADER_BYTES-1:0] header_byte_offset;
-// assign header_byte_offset = header_chirps_address_r[HEADER_BYTES-1:0];
-
 // TODO: add constants
 reg [3:0] byte_counter_r;
 reg [7:0] chirps_counter_r;
 
 // this is 16 bit delay / time for carrier on or off, depending on state
 reg [DELAY_BITS-1:0] delay_on_off_r;
+// this is strobe / trigger to start the delay
+reg delay_start_r;
 
 // state machine
 always @(posedge clock_in) begin
@@ -157,13 +153,14 @@ always @(posedge clock_in) begin
                 header_r[1] <= 0;
                 header_r[2] <= 0;
                 header_chirps_address_r <= 0;
-                index_extended_bit_address_r <= 0;
+                index_byte_address_r <= 0;
+                index_bit_offset_r <= 0;
                 index_byte_n0_r <= 0;
                 index_byte_n1_r <= 0;
                 byte_counter_r <= 0;
                 chirps_counter_r <= 0;
                 delay_on_off_r <= 0;
-                delay_start_strobe_out <= 0;
+                delay_start_r <= 0;
                 state_r <= S_IDLE;
             end
             S_IDLE: begin
@@ -176,9 +173,11 @@ always @(posedge clock_in) begin
                 header_r[byte_counter_r] <= mem_data_in;
                 if (byte_counter_r == 0) begin
                     if ((header_r[2] | header_r[1]) == 8'h00) begin
+                        // EOF for TV codes -> go back to reset state
                         state_r <= S_RESET;
                     end else begin
-                        index_extended_bit_address_r <= {header_chirps_address_r + 1 + {pair_num, 2'b00}, 3'b000};
+                        index_byte_address_r <= header_chirps_address_r + {pair_num, 2'b00} + 1;
+                        index_bit_offset_r <= 0;
                         chirps_counter_r <= chirps_num - 1;
                         header_chirps_address_r = header_chirps_address_r + 1;
                         state_r <= S_READ_INDEX;
@@ -207,16 +206,16 @@ always @(posedge clock_in) begin
                 end else begin
                     // byte_counter_r == 1
                     delay_on_off_r[15:8] <= mem_data_in;
-                    delay_start_strobe_out <= 1;
+                    delay_start_r <= 1;
                     state_r <= S_CARRIER_ON;
                 end
                 byte_counter_r <= byte_counter_r + 1;
             end
             S_CARRIER_ON: begin
-                if (delay_start_strobe_out & delay_busy_in) begin
-                    delay_start_strobe_out <= 0;
+                if (delay_start_r & delay_busy_in) begin
+                    delay_start_r <= 0;
                 end
-                if (!delay_start_strobe_out & !delay_busy_in) begin
+                if (!delay_start_r & !delay_busy_in) begin
                     state_r <= S_READ_CARRIER_OFF_TIME;
                 end
             end
@@ -225,27 +224,28 @@ always @(posedge clock_in) begin
                     delay_on_off_r[7:0] <= mem_data_in;
                 end else begin
                     delay_on_off_r[15:8] <= mem_data_in;
-                    delay_start_strobe_out <= 1;
+                    delay_start_r <= 1;
                     state_r <= S_CARRIER_OFF;
                 end
                 byte_counter_r <= byte_counter_r + 1;
             end
             S_CARRIER_OFF: begin
-                if (delay_start_strobe_out & delay_busy_in) begin
-                    delay_start_strobe_out <= 0;
+                if (delay_start_r & delay_busy_in) begin
+                    delay_start_r <= 0;
                 end
-                if (!delay_start_strobe_out & !delay_busy_in) begin
+                if (!delay_start_r & !delay_busy_in) begin
                     state_r <= S_PREPARE_NEXT_CYCLE;
                 end
             end
             S_PREPARE_NEXT_CYCLE: begin
                 if (chirps_counter_r == 0) begin
-                    header_chirps_address_r <= index_byte_address;      // TODO: check if not off-by-one
+                    header_chirps_address_r <= index_byte_address_r;      // TODO: check if not off-by-one
                     byte_counter_r <= HEADER_BYTES - 1;
                     state_r <= S_READ_HEADER;
                 end else begin
                     chirps_counter_r <= chirps_counter_r - 1;
-                    index_extended_bit_address_r <= index_extended_bit_address_r + chirp_delta;
+//                    index_extended_bit_address_r <= index_extended_bit_address_r + chirp_delta;
+                    // TODO: do arithmetic here
                     state_r <= S_READ_INDEX;
                 end
             end
@@ -259,13 +259,21 @@ always @(posedge clock_in) begin
     end
 end
 
-assign mem_address_out = (state_r == S_READ_INDEX) ? index_byte_address : (header_chirps_address_r + {chirp_pair_index, 2'b00});
+// combinatorial logic, mux for address out
+always @(*) begin
+    case (index_bits_num) 
+        S_READ_HEADER, S_READ_CARRIER_ON_TIME, S_READ_CARRIER_OFF_TIME: begin mem_address_out <= header_chirps_address_r; end
+        S_READ_INDEX: begin mem_address_out <= index_byte_address_r; end
+        default: begin mem_address_out <= 0; end
+    endcase
+end
 
 assign fail_out = (state_r == S_FAIL);
 
 assign busy_out = (state_r != S_IDLE);
 
 assign delay_enable_out = (state_r == S_CARRIER_ON) || (state_r == S_CARRIER_OFF);
+assign delay_start_strobe_out = delay_start_r;
 assign delay_value_out = delay_on_off_r;
 
 assign pwm_enable_out = (frequency != 0) && (state_r == S_CARRIER_ON);
