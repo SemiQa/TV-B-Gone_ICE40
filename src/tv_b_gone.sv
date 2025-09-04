@@ -19,6 +19,18 @@ module tv_b_gone (
     output  bit  ctc_out			// IR LED driving
 );
 
+	wire start_debounced;
+
+	btn_debouncer btn_dbc (
+        .clock_in(clock_in),      				// clock
+
+        .reset_in(reset_in),      				// resets internal counter (synchronous)
+
+		.btn_in(start_in),
+
+		.btn_out(start_debounced)
+	);
+
     localparam CTC_WIDTH = 8;
     localparam DELAY_WIDTH = 16;
 
@@ -78,7 +90,7 @@ module tv_b_gone (
 
 		.reset_in(reset_in),      			// resets internal counter (synchronous)
 
-		.start_in(start_in),      			// starts working when low (synchroous)
+		.start_in(start_debounced), 		// starts working when low (synchroous)
 		.loop_forever_in(loop_forever_in),
         .busy_out(busy_out),
         .fail_out(fail_out),

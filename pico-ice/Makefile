@@ -1,7 +1,7 @@
 
 # ---- iCE40 Pico-ICE Board ----
 
-pico-ice.json: ../src/ctc_generator.sv ../src/delay_timer.sv ../src/tv_codes_rom.sv ../src/controller.sv ../src/tv_b_gone.sv pico_ice.sv
+pico-ice.json: ../src/btn_debouncer.sv ../src/ctc_generator.sv ../src/delay_timer.sv ../src/tv_codes_rom.sv ../src/controller.sv ../src/tv_b_gone.sv pico_ice.sv
 	yosys -ql pico-ice.log -p 'synth_ice40 -top pico_ice -json pico-ice.json' $^
 
 pico-ice.asc: pico-ice.pcf pico-ice.json
