@@ -8,8 +8,6 @@
 module controller 
 #(
     parameter ADDRESS_BITS = 13,
-    parameter UNIT_COUNTS_US = 10,
-    parameter CLK_MHZ = 8,
     parameter DELAY_BITS = 16,
     parameter CTC_BITS = 8
 )
