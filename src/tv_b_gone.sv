@@ -1,21 +1,22 @@
 /*
- * Copyright (c) 2025 Embelon
+ * Copyright (c) 2025 SemiQa
  * SPDX-License-Identifier: Apache-2.0
  */
 
 `default_nettype none
 
 module tv_b_gone (
-    input   bit  clock_in,      // clock
+    input   bit  clock_in,      	// clock
 
-    input   bit  reset_in,      // resets internals (synchronous)
+    input   bit  reset_in,      	// resets internals (synchronous)
 
-    input   bit  start_in,     // starts working when high (synchroous)
+    input   bit  start_in,     		// starts working when high (synchroous)
+	input	bit  loop_forever_in,
 
-    output  bit  busy_out,      // still working when high
-    output  bit  fail_out,      // failure when high
+    output  bit  busy_out,      	// still working when high
+    output  bit  fail_out,      	// failure when high
 
-    output  bit  ctc_out
+    output  bit  ctc_out			// IR LED driving
 );
 
     localparam CTC_WIDTH = 8;
@@ -60,24 +61,25 @@ module tv_b_gone (
     #(
         .WIDTH(DELAY_WIDTH)
     )timer (
-        .clock_in(clock_in),      // clock
+        .clock_in(clock_in),      				// clock
 
-        .reset_in(reset_in),      // resets internal counter (synchronous)
-        .enable_in(delay_enable),     // working when high
+        .reset_in(reset_in),      				// resets internal counter (synchronous)
+        .enable_in(delay_enable),     			// working when high
 
-        .delay_in(delay_value),   // delay in number of units
-        .update_delay_in(delay_wr_strobe),        // write enable, active high (synchronous)
+        .delay_in(delay_value),   				// delay in number of units
+        .update_delay_in(delay_wr_strobe),      // write enable, active high (synchronous)
 
-        .busy_out(delay_busy)       // delay still not reached if high
+        .busy_out(delay_busy)       			// delay still not reached if high
 	);
 
 // TODO: add debouncing for button, if button triggers sequence
 	controller tvbgone_ctrl(
-		.clock_in(clock_in),      	// clock
+		.clock_in(clock_in),      			// clock
 
-		.reset_in(reset_in),      	// resets internal counter (synchronous)
+		.reset_in(reset_in),      			// resets internal counter (synchronous)
 
-		.start_in(start_in),      	// starts working when low (synchroous)
+		.start_in(start_in),      			// starts working when low (synchroous)
+		.loop_forever_in(loop_forever_in),
         .busy_out(busy_out),
         .fail_out(fail_out),
 

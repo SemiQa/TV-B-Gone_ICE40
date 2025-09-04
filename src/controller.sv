@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Embelon
+ * Copyright (c) 2025 SemiQa
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -12,13 +12,15 @@ module controller
     parameter CTC_BITS = 8
 )
 (
-    input   bit  clock_in,      // clock
+    input   bit  clock_in,          // clock
 
-    input   bit  reset_in,      // resets internal counter (synchronous)
+    input   bit  reset_in,          // resets internal counter (synchronous)
 
-    input   bit  start_in,      // starts working when high (synchroous)
-    output  bit  busy_out,      // still working when high
-    output  bit  fail_out,      // failure when high
+    input   bit  start_in,          // starts working when high (synchroous)
+    input   bit  loop_forever_in,   // loops forever sending codes, when high
+
+    output  bit  busy_out,          // still working when high
+    output  bit  fail_out,          // failure detected when high
 
     // memory interface
     output  bit [ADDRESS_BITS-1:0] mem_address_out,
@@ -163,7 +165,7 @@ always @(posedge clock_in) begin
                 state_r <= S_IDLE;
             end
             S_IDLE: begin
-                if (start_in) begin
+                if (start_in || loop_forever_in) begin
                     state_r <= S_READ_HEADER;
                     byte_counter_r <= HEADER_BYTES - 1;
                 end
@@ -175,7 +177,6 @@ always @(posedge clock_in) begin
                     index_bit_offset_r <= 0;
                     chirps_counter_r <= chirps_num - 1;
                     header_chirps_address_r = header_chirps_address_r + 1;
-                    // state_r <= S_READ_INDEX;
                     state_r <= S_CHECK_HEADER;
                 end else begin
                     header_chirps_address_r = header_chirps_address_r + 1;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Embelon
+ * Copyright (c) 2025 SemiQa
  * SPDX-License-Identifier: Apache-2.0
  */
 

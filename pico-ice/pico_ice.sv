@@ -8,17 +8,21 @@ module pico_ice (
 
 	// Button triggering sequence playing
 	input button_in,
+	input loop_forever_in,
 
 	// Project LEDs
 	output ir_led_out,
+	output ir_ledn_out,
 	output active_led_out,	
 	output fail_led_out,
 
 	// Trace outputs
+/*	
 	output trace_7_out,
 	output trace_6_out,
 	output trace_5_out,
 	output trace_4_out,
+*/
 	output trace_3_out,
 	output trace_2_out,
 	output trace_1_out,
@@ -68,6 +72,7 @@ module pico_ice (
     	.reset_in(!resetn),      	// resets internals (synchronous)
 
     	.start_in(!button_in),     	// starts working when high (synchroous)
+		.loop_forever_in(loop_forever_in),
 
     	.busy_out(active_led_out), 	// still working when high
     	.fail_out(fail_led_out),   	// failure when high
@@ -75,9 +80,17 @@ module pico_ice (
     	.ctc_out(ir_led_out)		// control for IR LED
 	);
 
+	assign ir_ledn_out = !ir_led_out;
+/*
 	wire [7:0] trace_out;
 	assign trace_out[7:0] = {trace_7_out, trace_6_out, trace_5_out, trace_4_out, trace_3_out, trace_2_out, trace_1_out, trace_0_out};
 
 	assign trace_out[7:0] = 8'b00;
+*/
+
+	wire [3:0] trace_out;
+	assign trace_out[3:0] = {trace_3_out, trace_2_out, trace_1_out, trace_0_out};
+
+	assign trace_out[3:0] = 4'h00;
 
 endmodule
