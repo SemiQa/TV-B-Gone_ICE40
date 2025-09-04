@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2025 SemiQa
+ * SPDX-License-Identifier: Apache-2.0
+ */
 `default_nettype none
 
 module pico_ice (
