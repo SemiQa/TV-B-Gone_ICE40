@@ -42,7 +42,7 @@ module tv_b_gone (
 	wire [7:0] rom_data;
 
 	tv_codes_rom rom (
-    	.address(rom_address[7:0]),
+    	.address(rom_address),
     	.data(rom_data),
     	.address_overflow()
 	);

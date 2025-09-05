@@ -225,11 +225,16 @@ always @(posedge clock_in) begin
                 byte_counter_r <= byte_counter_r + 1;
             end
             S_CARRIER_ON: begin
-                if (delay_start_r & delay_busy_in) begin
+                if (|delay_on_off_r == 0) begin
                     delay_start_r <= 0;
-                end
-                if (!delay_start_r & !delay_busy_in) begin
                     state_r <= S_READ_CARRIER_OFF_TIME;
+                end else begin
+                    if (delay_start_r & delay_busy_in) begin
+                        delay_start_r <= 0;
+                    end
+                    if (!delay_start_r & !delay_busy_in) begin
+                        state_r <= S_READ_CARRIER_OFF_TIME;
+                    end
                 end
             end
             S_READ_CARRIER_OFF_TIME: begin
@@ -244,11 +249,16 @@ always @(posedge clock_in) begin
                 byte_counter_r <= byte_counter_r + 1;
             end
             S_CARRIER_OFF: begin
-                if (delay_start_r & delay_busy_in) begin
+                if (|delay_on_off_r == 0) begin
                     delay_start_r <= 0;
-                end
-                if (!delay_start_r & !delay_busy_in) begin
                     state_r <= S_PREPARE_NEXT_CYCLE;
+                end else begin
+                    if (delay_start_r & delay_busy_in) begin
+                        delay_start_r <= 0;
+                    end
+                    if (!delay_start_r & !delay_busy_in) begin
+                        state_r <= S_PREPARE_NEXT_CYCLE;
+                    end
                 end
             end
             S_PREPARE_NEXT_CYCLE: begin
