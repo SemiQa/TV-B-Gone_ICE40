@@ -72,7 +72,7 @@ module tv_b_gone (
 	delay_timer 
     #(
         .WIDTH(DELAY_WIDTH)
-    )timer (
+    ) timer (
         .clock_in(clock_in),      				// clock
 
         .reset_in(reset_in),      				// resets internal counter (synchronous)
@@ -84,8 +84,7 @@ module tv_b_gone (
         .busy_out(delay_busy)       			// delay still not reached if high
 	);
 
-// TODO: add debouncing for button, if button triggers sequence
-	controller tvbgone_ctrl(
+	controller tvbgone_ctrl (
 		.clock_in(clock_in),      			// clock
 
 		.reset_in(reset_in),      			// resets internal counter (synchronous)
