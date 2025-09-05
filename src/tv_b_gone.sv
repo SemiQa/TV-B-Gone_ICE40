@@ -16,7 +16,11 @@ module tv_b_gone (
     output  bit  busy_out,      	// still working when high
     output  bit  fail_out,      	// failure when high
 
-    output  bit  ctc_out			// IR LED driving
+    output  bit  ctc_out,			// IR LED driving
+
+    // debug only
+    output	bit [3:0] state,
+    output  bit [7:0] mem
 );
 
 	wire start_debounced;
@@ -38,7 +42,7 @@ module tv_b_gone (
 	wire [7:0] rom_data;
 
 	tv_codes_rom rom (
-    	.address(rom_address),
+    	.address(rom_address[7:0]),
     	.data(rom_data),
     	.address_overflow()
 	);
@@ -72,7 +76,7 @@ module tv_b_gone (
 	delay_timer 
     #(
         .WIDTH(DELAY_WIDTH)
-    )timer (
+    ) timer (
         .clock_in(clock_in),      				// clock
 
         .reset_in(reset_in),      				// resets internal counter (synchronous)
@@ -85,7 +89,7 @@ module tv_b_gone (
 	);
 
 // TODO: add debouncing for button, if button triggers sequence
-	controller tvbgone_ctrl(
+	controller tvbgone_ctrl (
 		.clock_in(clock_in),      			// clock
 
 		.reset_in(reset_in),      			// resets internal counter (synchronous)
@@ -109,7 +113,10 @@ module tv_b_gone (
 		.delay_enable_out(delay_enable),
 		.delay_start_strobe_out(delay_wr_strobe),
 		.delay_value_out(delay_value),
-		.delay_busy_in(delay_busy)
+		.delay_busy_in(delay_busy),
+
+		.state(state),
+		.mem(mem)
 	);
 
 
