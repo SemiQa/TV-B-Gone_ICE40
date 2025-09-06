@@ -5,6 +5,8 @@
 `default_nettype none
 
 module pico_ice (
+	input clk_ext,
+
 	// Status LEDs
 	output led_red,
 	output led_green,
@@ -18,19 +20,7 @@ module pico_ice (
 	output ir_led_out,
 	output ir_ledn_out,
 	output active_led_out,	
-	output fail_led_out,
-
-	// Trace outputs
-/*	
-	output trace_7_out,
-	output trace_6_out,
-	output trace_5_out,
-	output trace_4_out,
-*/
-	output trace_3_out,
-	output trace_2_out,
-	output trace_1_out,
-	output trace_0_out
+	output fail_led_out
 );
 
 	assign led_red = 1;
@@ -43,10 +33,11 @@ module pico_ice (
 	reg [1:0] div3_r;
 	reg clk_8M = 0;				// 24MHz div 3 = 8MHz
 	always @(posedge clk_24M) begin
-		div3_r <= div3_r - 1;
 		if (div3_r == 0) begin
 			clk_8M = !clk_8M;
 			div3_r <= 3 - 1;
+		end else begin
+			div3_r <= div3_r - 1;
 		end
 	end
 
@@ -63,11 +54,11 @@ module pico_ice (
 	wire resetn = &reset_cnt;
 
 	always @(posedge clk_24M) begin
-		if (!resetn) begin
-			reset_cnt <= 0;
-		end else begin
+//		if (!resetn) begin
+//			reset_cnt <= 0;
+//		end else begin
 			reset_cnt <= reset_cnt + !resetn;
-		end
+//		end
 	end
 
 	tv_b_gone tv_gone (
@@ -85,16 +76,5 @@ module pico_ice (
 	);
 
 	assign ir_ledn_out = !ir_led_out;
-/*
-	wire [7:0] trace_out;
-	assign trace_out[7:0] = {trace_7_out, trace_6_out, trace_5_out, trace_4_out, trace_3_out, trace_2_out, trace_1_out, trace_0_out};
-
-	assign trace_out[7:0] = 8'b00;
-*/
-
-	wire [3:0] trace_out;
-	assign trace_out[3:0] = {trace_3_out, trace_2_out, trace_1_out, trace_0_out};
-
-	assign trace_out[3:0] = 4'h00;
 
 endmodule
