@@ -36,11 +36,12 @@ module tv_b_gone (
 
 	wire [12:0] rom_address;
 	wire [7:0] rom_data;
+	wire address_overflow;
 
 	tv_codes_rom rom (
     	.address(rom_address),
     	.data(rom_data),
-    	.address_overflow()
+    	.address_overflow(address_overflow)
 	);
 
     wire ctc_enable;

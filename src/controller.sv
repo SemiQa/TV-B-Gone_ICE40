@@ -60,8 +60,6 @@ assign chirps_num = header_r[HEADER_CHIRPS_INDEX];
 assign pairs_num = header_r[HEADER_PAIRNUM_COMPRESSION_INDEX][7:4];
 assign index_bits_num = header_r[HEADER_PAIRNUM_COMPRESSION_INDEX][2:0];
 
-localparam TIMING_BYTES = 4;
-
 localparam MAX_INDEX_BITS = 3;
 localparam INDEX_VECTOR_BITS = MAX_INDEX_BITS + 8 - 1;
 
@@ -111,26 +109,26 @@ assign chirp_pair_4b_index[3:0] = (index_bit_offset_r[MAX_INDEX_BITS-1] == 0) ? 
 reg [3:0] chirp_pair_3b_index;
 always @(*) begin
     case (index_bit_offset_r[MAX_INDEX_BITS-1:0])
-        0:  chirp_pair_3b_index <= {1'b0, index_vector_r[7:5]};
-        1:  chirp_pair_3b_index <= {1'b0, index_vector_r[4:2]};
-        2:  chirp_pair_3b_index <= {1'b0, index_vector_r[9:7]};
-        3:  chirp_pair_3b_index <= {1'b0, index_vector_r[6:4]};
-        4:  chirp_pair_3b_index <= {1'b0, index_vector_r[3:1]};
-        5:  chirp_pair_3b_index <= {1'b0, index_vector_r[8:6]};
-        6:  chirp_pair_3b_index <= {1'b0, index_vector_r[5:3]};
-        7:  chirp_pair_3b_index <= {1'b0, index_vector_r[2:0]};
-        default: chirp_pair_3b_index <= 4'b0000;
+        0:  chirp_pair_3b_index = {1'b0, index_vector_r[7:5]};
+        1:  chirp_pair_3b_index = {1'b0, index_vector_r[4:2]};
+        2:  chirp_pair_3b_index = {1'b0, index_vector_r[9:7]};
+        3:  chirp_pair_3b_index = {1'b0, index_vector_r[6:4]};
+        4:  chirp_pair_3b_index = {1'b0, index_vector_r[3:1]};
+        5:  chirp_pair_3b_index = {1'b0, index_vector_r[8:6]};
+        6:  chirp_pair_3b_index = {1'b0, index_vector_r[5:3]};
+        7:  chirp_pair_3b_index = {1'b0, index_vector_r[2:0]};
+        default: chirp_pair_3b_index = 4'b0000;
     endcase
 end
 
 reg [3:0] chirp_pair_2b_index;
 always @(*) begin
     case (index_bit_offset_r[MAX_INDEX_BITS-1:1]) 
-        0:  chirp_pair_2b_index <= {2'b00, index_vector_r[7:6]};
-        1:  chirp_pair_2b_index <= {2'b00, index_vector_r[5:4]};
-        2:  chirp_pair_2b_index <= {2'b00, index_vector_r[3:2]};
-        3:  chirp_pair_2b_index <= {2'b00, index_vector_r[1:0]};
-        default: chirp_pair_2b_index <= 4'b0000;
+        0:  chirp_pair_2b_index = {2'b00, index_vector_r[7:6]};
+        1:  chirp_pair_2b_index = {2'b00, index_vector_r[5:4]};
+        2:  chirp_pair_2b_index = {2'b00, index_vector_r[3:2]};
+        3:  chirp_pair_2b_index = {2'b00, index_vector_r[1:0]};
+        default: chirp_pair_2b_index = 4'b0000;
     endcase
 end
 
@@ -176,11 +174,11 @@ always @(posedge clock_in) begin
             end
             S_READ_HEADER: begin
                 header_r[byte_counter_r] <= mem_data_in;
-                header_chirps_address_r = header_chirps_address_r + 1;
+                header_chirps_address_r <= header_chirps_address_r + 1;
                 if (byte_counter_r == 0) begin
                     state_r <= S_CHECK_HEADER;
                 end else begin
-                    byte_counter_r = byte_counter_r - 1;
+                    byte_counter_r <= byte_counter_r - 1;
                 end
             end
             S_CHECK_HEADER: begin
@@ -191,7 +189,7 @@ always @(posedge clock_in) begin
                     && (chirps_num != 0) 
                     && (pairs_num != 0)) begin
                     index_bit_offset_r <= 0;
-                    index_byte_address_r <= header_chirps_address_r + {pairs_num, 2'b00};
+                    index_byte_address_r <= header_chirps_address_r + {{ADDRESS_BITS-1-6}{0}, pairs_num, 2{0}};
                     chirps_counter_r <= chirps_num - 1;                  
                     state_r <= S_READ_INDEX;
                 end else begin
@@ -283,10 +281,10 @@ end
 // combinatorial logic, mux for address out
 always @(*) begin
     case (state_r) 
-        S_READ_HEADER, S_CHECK_HEADER: begin mem_address_out <= header_chirps_address_r; end
-        S_READ_INDEX: begin mem_address_out <= index_byte_address_r; end
-        S_READ_CARRIER_ON_TIME, S_READ_CARRIER_OFF_TIME: begin mem_address_out <= header_chirps_address_r + {chirp_pair_index[3:0], byte_counter_r[1:0]}; end
-        default: begin mem_address_out <= 0; end
+        S_READ_HEADER, S_CHECK_HEADER: begin mem_address_out = header_chirps_address_r; end
+        S_READ_INDEX: begin mem_address_out = index_byte_address_r; end
+        S_READ_CARRIER_ON_TIME, S_READ_CARRIER_OFF_TIME: begin mem_address_out = header_chirps_address_r + {chirp_pair_index[3:0], byte_counter_r[1:0]}; end
+        default: begin mem_address_out = 0; end
     endcase
 end
 

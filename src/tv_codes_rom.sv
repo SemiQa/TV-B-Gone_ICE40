@@ -18,13 +18,13 @@ module tv_codes_rom
     output bit address_overflow
 );
 
-bit [DATA_WIDTH-1:0] rom [0:SIZE-1];
+bit [DATA_WIDTH-1:0] rom_array [0:SIZE-1];
 
 initial begin
-    $readmemh(INIT_FILE, rom);
+    $readmemh(INIT_FILE, rom_array);
 end
 
 assign address_overflow = (address >= SIZE);
-assign data = !address_overflow ? rom[address] : {DATA_WIDTH{1'b0}};
+assign data = !address_overflow ? rom_array[address] : {DATA_WIDTH{1'b0}};
 
 endmodule
