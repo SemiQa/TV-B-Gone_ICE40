@@ -36,6 +36,7 @@ module tv_b_gone (
 
 	wire [12:0] rom_address;
 	wire [7:0] rom_data;
+	/* verilator lint_off UNUSEDSIGNAL */
 	wire address_overflow;
 
 	tv_codes_rom rom (
@@ -43,6 +44,7 @@ module tv_b_gone (
     	.data(rom_data),
     	.address_overflow(address_overflow)
 	);
+	/* verilator lint_on UNUSEDSIGNAL */
 
     wire ctc_enable;
 	wire ctc_forced_out;

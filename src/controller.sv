@@ -189,7 +189,7 @@ always @(posedge clock_in) begin
                     && (chirps_num != 0) 
                     && (pairs_num != 0)) begin
                     index_bit_offset_r <= 0;
-                    index_byte_address_r <= header_chirps_address_r + {{ADDRESS_BITS-1-6}{0}, pairs_num, 2{0}};
+                    index_byte_address_r <= header_chirps_address_r + { {(ADDRESS_BITS-1-6){1'b0}}, pairs_num, 2'b00 };
                     chirps_counter_r <= chirps_num - 1;                  
                     state_r <= S_READ_INDEX;
                 end else begin
@@ -283,7 +283,7 @@ always @(*) begin
     case (state_r) 
         S_READ_HEADER, S_CHECK_HEADER: begin mem_address_out = header_chirps_address_r; end
         S_READ_INDEX: begin mem_address_out = index_byte_address_r; end
-        S_READ_CARRIER_ON_TIME, S_READ_CARRIER_OFF_TIME: begin mem_address_out = header_chirps_address_r + {chirp_pair_index[3:0], byte_counter_r[1:0]}; end
+        S_READ_CARRIER_ON_TIME, S_READ_CARRIER_OFF_TIME: begin mem_address_out = header_chirps_address_r + { {(ADDRESS_BITS-1-6){1'b0}}, chirp_pair_index[3:0], byte_counter_r[1:0]}; end
         default: begin mem_address_out = 0; end
     endcase
 end
