@@ -1,0 +1,7 @@
+{ "reg": [
+    { "bits": 3, "name": "index_bits_num", "attr": "2, 3 or 4" },
+    { "bits": 1, "name": "unused", "type": 1 },
+    { "bits": 4, "name": "pairs_num", "attr": "1 to 15" }
+  ],
+  "config": { "bits": 8, "lanes": 1 }
+}

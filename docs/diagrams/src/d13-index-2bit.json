@@ -1,0 +1,8 @@
+{ "reg": [
+    { "bits": 2, "name": "idx 3", "attr": "off 6" },
+    { "bits": 2, "name": "idx 2", "attr": "off 4" },
+    { "bits": 2, "name": "idx 1", "attr": "off 2" },
+    { "bits": 2, "name": "idx 0", "attr": "off 0" }
+  ],
+  "config": { "bits": 8, "lanes": 1 }
+}

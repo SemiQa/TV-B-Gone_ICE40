@@ -1,0 +1,9 @@
+{ "signal": [
+    { "name": "btn_in",   "wave": "l.h.....l." },
+    { "name": "probe_r",  "wave": "=.===...==",
+      "data": ["000", "001", "011", "111", "110", "100"] },
+    { "name": "btn_out",  "wave": "l..hl....." }
+  ],
+  "head": { "text": "btn_debouncer: one pulse per confirmed press" },
+  "foot": { "text": "One slot is one 10 ms sample." }
+}

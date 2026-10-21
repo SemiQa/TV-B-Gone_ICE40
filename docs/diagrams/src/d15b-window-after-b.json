@@ -1,0 +1,8 @@
+{ "reg": [
+    { "bits": 1, "name": "carry", "attr": "B[0]", "type": 2 },
+    { "bits": 3, "name": "phase 4", "attr": "B[3:1]" },
+    { "bits": 3, "name": "phase 3", "attr": "B[6:4]" },
+    { "bits": 3, "name": "phase 2", "attr": "A[1:0] + B[7]" }
+  ],
+  "config": { "bits": 10, "lanes": 1 }
+}

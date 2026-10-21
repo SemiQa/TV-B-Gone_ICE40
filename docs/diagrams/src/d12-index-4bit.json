@@ -1,0 +1,6 @@
+{ "reg": [
+    { "bits": 4, "name": "index 1", "attr": "offset 4" },
+    { "bits": 4, "name": "index 0", "attr": "offset 0" }
+  ],
+  "config": { "bits": 8, "lanes": 1 }
+}

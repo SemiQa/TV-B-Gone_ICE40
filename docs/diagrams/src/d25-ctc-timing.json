@@ -1,0 +1,14 @@
+{ "signal": [
+    { "name": "clock",                "wave": "p..................." },
+    { "name": "update_comp_value_in", "wave": "lhl................." },
+    { "name": "ocr_r",                "wave": "=.=.................", "data": ["0", "2"] },
+    { "name": "enable_in",            "wave": "l.h...........l....." },
+    { "name": "out",                  "wave": "l....h..l..h..l....." },
+    { "name": "forced_in",            "wave": "l..............h...." },
+    { "name": "ctc_out",              "wave": "l....h..l..h..lh...." },
+    { "name": "half period",          "wave": "x.5..8..5..8..x.....",
+      "data": ["OCR+1", "OCR+1"] }
+  ],
+  "head": { "text": "ctc_generator: load, run, and forced output" },
+  "foot": { "text": "Drawn with OCR = 2. One slot is one clock." }
+}

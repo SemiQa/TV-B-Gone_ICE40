@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 640" width="980" height="640" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <!-- Hand-authored figure D34b. Opaque white background so it stays visible on
+       GitHub's dark theme (see docs/diagrams/README.md). -->
+  <rect x="0" y="0" width="980" height="640" fill="#ffffff"/>
+  <defs>
+    <g id="gnd" stroke="#0f172a" stroke-width="2">
+      <line x1="-12" y1="0" x2="12" y2="0"/>
+      <line x1="-7" y1="5" x2="7" y2="5"/>
+      <line x1="-3" y1="10" x2="3" y2="10"/>
+    </g>
+    <g id="vcc">
+      <line x1="-12" y1="0" x2="12" y2="0" stroke="#0f172a" stroke-width="2"/>
+      <text x="0" y="-7" text-anchor="middle" font-size="12" font-weight="bold" fill="#0f172a">3V3</text>
+    </g>
+    <g id="nc" stroke="#64748b" stroke-width="2">
+      <line x1="-5" y1="-5" x2="5" y2="5"/>
+      <line x1="-5" y1="5" x2="5" y2="-5"/>
+    </g>
+  </defs>
+
+  <g stroke="#0f172a" stroke-width="2" fill="none">
+
+    <!-- ===================== Pico-ICE ===================== -->
+    <rect x="30" y="30" width="230" height="580" rx="6" fill="#f1f5f9" stroke="#334155"/>
+
+    <!-- ===================== start button, pin 10 ===================== -->
+    <line x1="260" y1="150" x2="400" y2="150"/>
+    <line x1="400" y1="150" x2="400" y2="128"/>
+    <rect x="394" y="92" width="12" height="36" fill="#ffffff"/>
+    <line x1="400" y1="92" x2="400" y2="78"/>
+    <line x1="400" y1="150" x2="472" y2="150"/>
+    <circle cx="476" cy="150" r="4" fill="#ffffff"/>
+    <circle cx="524" cy="150" r="4" fill="#ffffff"/>
+    <line x1="468" y1="137" x2="532" y2="137"/>
+    <line x1="500" y1="137" x2="500" y2="124"/>
+    <line x1="490" y1="124" x2="510" y2="124"/>
+    <line x1="528" y1="150" x2="580" y2="150"/>
+    <line x1="580" y1="150" x2="580" y2="165"/>
+
+    <!-- ===================== loop jumper, pin 11 ===================== -->
+    <line x1="260" y1="270" x2="400" y2="270"/>
+    <line x1="400" y1="270" x2="400" y2="248"/>
+    <rect x="394" y="212" width="12" height="36" fill="#ffffff"/>
+    <line x1="400" y1="212" x2="400" y2="198"/>
+    <line x1="400" y1="270" x2="477" y2="270"/>
+    <rect x="477" y="265" width="10" height="10" fill="#ffffff"/>
+    <rect x="513" y="265" width="10" height="10" fill="#ffffff"/>
+    <rect x="469" y="257" width="62" height="26" rx="3" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <line x1="523" y1="270" x2="580" y2="270"/>
+    <line x1="580" y1="270" x2="580" y2="285"/>
+
+    <!-- ===================== to the IR PMOD ===================== -->
+    <line x1="260" y1="350" x2="284" y2="350"/>
+    <line x1="260" y1="400" x2="660" y2="400"/>
+    <line x1="260" y1="450" x2="660" y2="450"/>
+    <line x1="260" y1="500" x2="660" y2="500"/>
+
+    <rect x="660" y="330" width="290" height="270" rx="6" fill="#ede9fe" stroke="#581c87"/>
+    <line x1="640" y1="350" x2="660" y2="350"/>
+    <line x1="612" y1="550" x2="660" y2="550"/>
+    <line x1="612" y1="580" x2="660" y2="580"/>
+  </g>
+
+  <use href="#vcc" x="400" y="78"/>
+  <use href="#vcc" x="400" y="198"/>
+  <use href="#gnd" x="580" y="165"/>
+  <use href="#gnd" x="580" y="285"/>
+  <circle cx="400" cy="150" r="4" fill="#0f172a"/>
+  <circle cx="400" cy="270" r="4" fill="#0f172a"/>
+  <use href="#nc" x="284" y="350"/>
+  <use href="#nc" x="640" y="350"/>
+
+  <!-- ===================== text ===================== -->
+  <g fill="#0f172a">
+    <text x="145" y="60" text-anchor="middle" font-size="16" font-weight="bold">Pico-ICE</text>
+    <text x="145" y="78" text-anchor="middle" font-size="12" fill="#475569">iCE40UP5K · pins as in pico-ice.pcf</text>
+
+    <g text-anchor="end" font-family="Consolas, Menlo, monospace" font-size="13">
+      <text x="250" y="144">button_in</text>
+      <text x="250" y="264">loop_forever_in</text>
+      <text x="250" y="344">ir_led_out</text>
+      <text x="250" y="394">ir_ledn_out</text>
+      <text x="250" y="444">active_led_out</text>
+      <text x="250" y="494">fail_led_out</text>
+    </g>
+    <g text-anchor="end" font-size="12" fill="#475569">
+      <text x="250" y="166">pin 10 · active low</text>
+      <text x="250" y="286">pin 11 · active high</text>
+      <text x="250" y="366">pin 3 · unused here</text>
+      <text x="250" y="416">pin 6 · low = IR on</text>
+      <text x="250" y="466">pin 4 · active high</text>
+      <text x="250" y="516">pin 48 · active high</text>
+    </g>
+
+    <text x="414" y="114">R1 10k</text>
+    <text x="414" y="234">R2 10k</text>
+    <text x="500" y="176" text-anchor="middle">S1 start</text>
+    <text x="500" y="302" text-anchor="middle">loop jumper</text>
+
+    <g font-size="12" fill="#334155">
+      <text x="620" y="146">pressed: pin low, a run starts</text>
+      <text x="620" y="162" fill="#64748b">in parallel with the board's own SW2</text>
+      <text x="620" y="266">jumper fitted: one pass, then stop</text>
+      <text x="620" y="282">jumper open: loop forever</text>
+    </g>
+
+    <text x="660" y="320" font-weight="bold">IR PMOD</text>
+    <text x="726" y="320" font-size="12" fill="#475569">flummer/tt-ir-pmod rev 1.3, connector J1</text>
+    <g font-family="Consolas, Menlo, monospace" font-size="12">
+      <text x="668" y="354">1 IR_LED_OUT</text>
+      <text x="668" y="404">2 IR_LED_OUT_N</text>
+      <text x="668" y="454">3 ACTIVE_LED_N</text>
+      <text x="668" y="504">4 FAILURE_LED_N</text>
+      <text x="668" y="554">5 GND</text>
+      <text x="668" y="584">6 3V3</text>
+    </g>
+    <g font-size="12" fill="#334155">
+      <text x="830" y="396" font-weight="bold">JP1 on OUT_N</text>
+      <text x="830" y="412">3 × IR LED</text>
+      <text x="830" y="446">green LED</text>
+      <text x="830" y="462">lit when pin is low</text>
+      <text x="830" y="496">red LED</text>
+      <text x="830" y="512">lit when pin is low</text>
+    </g>
+    <g font-size="12" fill="#92400e">
+      <text x="830" y="556" font-weight="bold">on the Pico-ICE:</text>
+      <text x="830" y="572">fit 47 Ω for R5–R7</text>
+    </g>
+    <rect x="290" y="524" width="282" height="76" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+    <g font-size="12" fill="#78350f">
+      <text x="300" y="542" font-weight="bold">Status logic inverted on the Pico-ICE</text>
+      <text x="300" y="558">pins 4 and 48 are active high; the PMOD's</text>
+      <text x="300" y="574">LEDs light on low. Green is lit while idle,</text>
+      <text x="300" y="590">red unless the code table is rejected.</text>
+    </g>
+    <g font-size="12" font-weight="bold" text-anchor="end">
+      <text x="606" y="554">GND</text>
+      <text x="606" y="584">3V3</text>
+    </g>
+  </g>
+</svg>

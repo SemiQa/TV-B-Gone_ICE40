@@ -1,0 +1,18 @@
+{ "signal": [
+    ["macro",
+      { "name": "envelope",     "wave": "lh.|..l.|.h..l.|.h..l.." },
+      { "name": "IR LED drive", "wave": "lp.|..l.|.p..l.|.p..l.." },
+      { "name": "10 us units",  "wave": "x5....8...5..8...5..8..",
+        "data": ["on 264", "off 90", "on 43", "off 91", "on 43", "off 47"] }
+    ],
+    {},
+    ["zoom",
+      { "name": "clock",        "wave": "p......................" },
+      { "name": "ctc_out",      "wave": "lh..l..h..l..h..l..h..." },
+      { "name": "half period",  "wave": "x5..8..5..8..5..8..5...",
+        "data": ["OCR+1", "OCR+1"] }
+    ]
+  ],
+  "head": { "text": "IR remote signalling: a gated carrier" },
+  "foot": { "text": "Breaks mark elided time; carrier cycles are indicative, not counted. Zoom drawn with OCR = 2 for legibility." }
+}

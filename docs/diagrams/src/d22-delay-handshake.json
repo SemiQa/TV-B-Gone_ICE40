@@ -1,0 +1,25 @@
+{ "signal": [
+    ["normal",
+      { "name": "clock",           "wave": "p...|....." },
+      { "name": "state_r",         "wave": "58.....5..",
+        "data": ["READ_ON", "CARRIER_ON", "READ_OFF"] },
+      { "name": "delay_start_r",   "wave": "lh.l|....." },
+      { "name": "delay_enable_out","wave": "lh..|..l.." },
+      { "name": "delay_busy_in",   "wave": "l.h.|.l..." },
+      { "name": "ctc_enable_out",  "wave": "lh..|..l.." }
+    ],
+    {},
+    ["zero",
+      { "name": "clock",           "wave": "p........." },
+      { "name": "state_r",         "wave": "585.......",
+        "data": ["READ_ON", "CARRIER_ON", "READ_OFF"] },
+      { "name": "delay_start_r",   "wave": "lhl......." },
+      { "name": "delay_enable_out","wave": "lhl......." },
+      { "name": "delay_busy_in",   "wave": "l........." },
+      { "name": "ctc_enable_out",  "wave": "lhl......." }
+    ]
+  ],
+  "config": { "hscale": 2 },
+  "head": { "text": "Handing a duration to delay_timer" },
+  "foot": { "text": "One slot is one clock. The break marks the delay counting down." }
+}
