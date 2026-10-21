@@ -16,7 +16,7 @@ module controller
 
     input   bit  reset_in,          // resets internal counter (synchronous)
 
-    input   bit  start_in,          // starts working when high (synchroous)
+    input   bit  start_in,          // starts working when high (synchronous)
     input   bit  loop_forever_in,   // loops forever sending codes, when high
 
     output  bit  busy_out,          // still working when high
@@ -89,6 +89,9 @@ reg [MAX_INDEX_BITS-1:0] index_bit_offset_r;
 
 reg [INDEX_VECTOR_BITS-1:0] index_vector_r;
 
+// True when the chirp just emitted used up the index bits held in
+// index_vector_r, so the next one needs a fresh byte. Evaluated on the offset
+// *before* it advances. See docs/rom-format.md, "Where a record ends".
 wire read_next_index_byte;
 assign read_next_index_byte = 
     ((index_bits_num == 4) 
@@ -100,12 +103,18 @@ assign read_next_index_byte =
             || (index_bit_offset_r[MAX_INDEX_BITS-1:0] == 4)
             || (index_bit_offset_r[MAX_INDEX_BITS-1:0] == 7)));
 
+// For 3-bit indices the step is 1, not 3: index_bit_offset_r then counts
+// phases 0..7 through a repeating 3-byte window rather than bit positions.
+// That is what makes the case statement below look arbitrary -- each phase is a
+// different slice of the window. See docs/rom-format.md, "3 bits per index".
 wire [MAX_INDEX_BITS-1:0] index_bit_delta;
 assign index_bit_delta = (index_bits_num == 3) ? (1) : (index_bits_num);
 
 wire [3:0] chirp_pair_4b_index;
 assign chirp_pair_4b_index[3:0] = (index_bit_offset_r[MAX_INDEX_BITS-1] == 0) ? index_vector_r[7:4] : index_vector_r[3:0];
 
+// One arm per phase of the 8-index / 3-byte window; phases 2 and 5 straddle a
+// byte boundary and reach into the carried bits. Table in docs/rom-format.md.
 reg [3:0] chirp_pair_3b_index;
 always @(*) begin
     case (index_bit_offset_r[MAX_INDEX_BITS-1:0])
@@ -138,6 +147,10 @@ assign chirp_pair_index[3:0] = (index_bits_num[1])
                                 : ((index_bits_num[2] & !index_bits_num[0]) ? chirp_pair_4b_index : 4'b0000);
 
 // TODO: add constants
+// byte_counter_r does three jobs in turn: counts the header bytes down 2->0,
+// then indexes the on-time bytes (0,1) and the off-time bytes (2,3) of a
+// pair-table entry, where it also supplies the low address bits. Two bits wide,
+// so 3+1 wraps to 0 ready for the next chirp with no explicit reset.
 reg [1:0] byte_counter_r;
 reg [7:0] chirps_counter_r;
 
@@ -189,6 +202,9 @@ always @(posedge clock_in) begin
                     && (chirps_num != 0) 
                     && (pairs_num != 0)) begin
                     index_bit_offset_r <= 0;
+                    // Index bytes start after the pair table: pairs_num entries
+                    // of 4 bytes. The concatenation is pairs_num * 4, zero-extended;
+                    // 6 magnitude bits are enough because pairs_num <= 15.
                     index_byte_address_r <= header_chirps_address_r + { {(ADDRESS_BITS-1-6){1'b0}}, pairs_num, 2'b00 };
                     chirps_counter_r <= chirps_num - 1;                  
                     state_r <= S_READ_INDEX;
@@ -197,6 +213,8 @@ always @(posedge clock_in) begin
                 end
             end
             S_READ_INDEX: begin
+                // Slide the window: keep the (at most 2) bits not yet consumed and
+                // append the new byte. 10 bits is exactly 8 new + 2 carried.
                 index_vector_r[INDEX_VECTOR_BITS-1:0] <= {index_vector_r[1:0], mem_data_in[7:0]};
                 byte_counter_r <= 0;
                 state_r <= S_CHECK_INDEX;
@@ -220,10 +238,16 @@ always @(posedge clock_in) begin
                 byte_counter_r <= byte_counter_r + 1;
             end
             S_CARRIER_ON: begin
+                // A duration of zero never raises busy, so waiting for the
+                // timer here would hang. Skip straight on instead.
                 if (|delay_on_off_r == 0) begin
                     delay_start_r <= 0;
                     state_r <= S_READ_CARRIER_OFF_TIME;
                 end else begin
+                    // Two-phase handshake: hold the strobe until the timer
+                    // acknowledges by raising busy, then drop it and wait for busy
+                    // to fall. Dropping it earlier risks the load never landing;
+                    // holding it reloads the timer the moment it finishes.
                     if (delay_start_r & delay_busy_in) begin
                         delay_start_r <= 0;
                     end
@@ -244,6 +268,8 @@ always @(posedge clock_in) begin
                 byte_counter_r <= byte_counter_r + 1;
             end
             S_CARRIER_OFF: begin
+                // A duration of zero never raises busy, so waiting for the
+                // timer here would hang. Skip straight on instead.
                 if (|delay_on_off_r == 0) begin
                     delay_start_r <= 0;
                     state_r <= S_PREPARE_NEXT_CYCLE;
@@ -258,6 +284,8 @@ always @(posedge clock_in) begin
             end
             S_PREPARE_NEXT_CYCLE: begin
                 if (chirps_counter_r == 0) begin
+                    // A record ends one byte after the last index byte actually
+                    // fetched -- there is no length field anywhere.
                     header_chirps_address_r <= index_byte_address_r + 1;
                     byte_counter_r <= HEADER_BYTES - 1;
                     state_r <= S_READ_HEADER;
@@ -283,6 +311,8 @@ always @(*) begin
     case (state_r) 
         S_READ_HEADER, S_CHECK_HEADER: begin mem_address_out = header_chirps_address_r; end
         S_READ_INDEX: begin mem_address_out = index_byte_address_r; end
+        // pair-table entry i lives at base + 3 + i*4; header_chirps_address_r is
+        // already base+3 here, and byte_counter_r supplies the byte within the entry
         S_READ_CARRIER_ON_TIME, S_READ_CARRIER_OFF_TIME: begin mem_address_out = header_chirps_address_r + { {(ADDRESS_BITS-1-6){1'b0}}, chirp_pair_index[3:0], byte_counter_r[1:0]}; end
         default: begin mem_address_out = 0; end
     endcase

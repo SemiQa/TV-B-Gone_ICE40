@@ -24,6 +24,9 @@ initial begin
     $readmemh(INIT_FILE, rom_array);
 end
 
+// Combinational read: data follows address within the same cycle, with no
+// enable and no latency, which is what makes every read state in the controller
+// a single cycle. Addresses past the end return zero rather than X.
 assign address_overflow = (address >= SIZE);
 assign data = !address_overflow ? rom_array[address] : {DATA_WIDTH{1'b0}};
 

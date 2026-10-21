@@ -23,12 +23,17 @@ module delay_timer
     output  bit  busy_out       // delay still not reached if high
 );
 
+// Clocks per 10 us unit -- 80 at the default 8 MHz. CLK_MHZ must match the real
+// clock or every duration in every code is wrong by the same factor.
 localparam COUNTS_PER_UNIT = CLK_MHZ * UNIT_COUNTS_US;
 localparam UNIT_COUNTER_WIDTH = $clog2(COUNTS_PER_UNIT);
 
 reg [WIDTH-1:0] delay_r;
 reg [UNIT_COUNTER_WIDTH-1:0] unit_counter_r;
 
+// Combinational, and gated by enable_in: it responds in the same cycle the
+// enable changes, and a new delay can only be loaded while it is low. A count of
+// zero never raises it at all, which callers must handle separately.
 assign busy_out = (delay_r != 0) && enable_in;
 
 always @(posedge clock_in) begin

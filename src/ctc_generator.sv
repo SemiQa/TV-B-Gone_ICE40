@@ -39,12 +39,18 @@ always @(posedge clock_in) begin
         end else begin
             counter_r <= counter_r + 1;
         end
+    // Only reachable while enable_in is low: a write during a burst is ignored,
+    // so the controller loads the compare value between chirps. Loading also
+    // clears the counter, starting each code from a known point.
     end else if (update_comp_value_in) begin
         ocr_r <= compare_value_in;
         counter_r <= 0;
     end
 end
 
+// Half period is ocr_r + 1 clocks, so the carrier period is 2 * (ocr_r + 1).
+// While disabled the output is forced_in, which is how codes with no carrier
+// hold the LED steadily on for a burst.
 assign ctc_out = enable_in ? out : forced_in;
 
 endmodule

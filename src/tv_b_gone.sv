@@ -10,8 +10,8 @@ module tv_b_gone (
 
     input   bit  reset_in,      	// resets internals (synchronous)
 
-    input   bit  start_in,     		// starts working when high (synchroous)
-	input	bit  loop_forever_in,
+    input   bit  start_in,     		// starts working when high (synchronous)
+    input	bit  loop_forever_in,
 
     output  bit  busy_out,      	// still working when high
     output  bit  fail_out,      	// failure when high
@@ -34,6 +34,7 @@ module tv_b_gone (
     localparam CTC_WIDTH = 8;
     localparam DELAY_WIDTH = 16;
 
+	// 13 bits spans either regional code table; the combined table would need 14.
 	wire [12:0] rom_address;
 	wire [7:0] rom_data;
 	/* verilator lint_off UNUSEDSIGNAL */
@@ -92,7 +93,7 @@ module tv_b_gone (
 
 		.reset_in(reset_in),      			// resets internal counter (synchronous)
 
-		.start_in(start_debounced), 		// starts working when low (synchroous)
+		.start_in(start_debounced), 		// starts working when high (synchronous)
 		.loop_forever_in(loop_forever_in),
         .busy_out(busy_out),
         .fail_out(fail_out),
