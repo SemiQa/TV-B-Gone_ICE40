@@ -1,3 +1,28 @@
+# Build artifacts
 *.asc
 *.log
+*.rpt
 *.dfu
+pico-ice/pico-ice.json
+pico-ice/pico-ice.bin
+
+# Archived reports of the released builds: only the timing reports are kept.
+# The netlist and placed design are large intermediates, and the synthesis log
+# records local install paths.
+pico-ice/eu/*
+pico-ice/na/*
+!pico-ice/eu/pico-ice.rpt
+!pico-ice/na/pico-ice.rpt
+
+# Released bitstreams under bitstreams/ are committed on purpose, so that people
+# without the toolchain can flash the board -- see docs/adr.md ADR-017.
+# The line above ignores only the transient Makefile output.
+
+# Python
+__pycache__/
+
+# Scratch space for temporary files and one-offs.
+# The directory itself is kept so the convention is discoverable; its contents
+# are never committed.
+tmp/*
+!tmp/.gitkeep
