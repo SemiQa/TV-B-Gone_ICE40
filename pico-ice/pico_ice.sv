@@ -27,12 +27,26 @@ module pico_ice (
 	assign led_green = 1;
 	assign led_blue = 1;
 
-    wire clk_24M;
-    SB_HFOSC #(.CLKHF_DIV("0b01")) inthosc(.CLKHFPU(1'b1), .CLKHFEN(1'b1), .CLKHF(clk_24M));		// 24MHz internal osc.
+	// 12 MHz from the RP2040 on pin 35, multiplied to 48 MHz by the PLL
+	wire clk_48M;
+	wire pll_locked;
+	SB_PLL40_PAD #(
+		.FEEDBACK_PATH("SIMPLE"),
+		.DIVR(4'b0000),			// 12 MHz / 1 = 12 MHz at the phase detector
+		.DIVF(7'b0111111),		// x 64 = 768 MHz VCO
+		.DIVQ(3'b100),			// / 16 = 48 MHz
+		.FILTER_RANGE(3'b001)
+	) pll (
+		.PACKAGEPIN(clk_ext),
+		.PLLOUTGLOBAL(clk_48M),
+		.LOCK(pll_locked),
+		.RESETB(1'b1),
+		.BYPASS(1'b0)
+	);
 
 	reg [1:0] div3_r;
-	reg clk_8M = 0;				// 24MHz div 3 = 8MHz
-	always @(posedge clk_24M) begin
+	reg clk_8M = 0;				// toggles every 3rd 48MHz cycle: 48MHz div 6 = 8MHz
+	always @(posedge clk_48M) begin
 		if (div3_r == 0) begin
 			clk_8M = !clk_8M;
 			div3_r <= 3 - 1;
@@ -41,24 +55,16 @@ module pico_ice (
 		end
 	end
 
-/*
-	wire clk;						// 8MHz buffered clock
-	SB_GB ClockBuffer(
-		.USER_SIGNAL_TO_GLOBAL_BUFFER(clk_8M_buf),
-		.GLOBAL_BUFFER_OUTPUT(clk_8M)
-	);
-*/
-
-	// ~2.7ms reset pulse (65536 / 24M)
+	// ~1.4ms reset pulse (65536 / 48M), counted from PLL lock
 	reg [15:0] reset_cnt = 0;
 	wire resetn = &reset_cnt;
 
-	always @(posedge clk_24M) begin
-//		if (!resetn) begin
-//			reset_cnt <= 0;
-//		end else begin
+	always @(posedge clk_48M) begin
+		if (!pll_locked) begin
+			reset_cnt <= 0;
+		end else begin
 			reset_cnt <= reset_cnt + !resetn;
-//		end
+		end
 	end
 
 	tv_b_gone tv_gone (
@@ -66,7 +72,7 @@ module pico_ice (
 
     	.reset_in(!resetn),      	// resets internals (synchronous)
 
-    	.start_in(!button_in),     	// starts working when high (synchroous)
+    	.start_in(button_in),     	// starts working when high (synchroous)
 		.loop_forever_in(loop_forever_in),
 
     	.busy_out(active_led_out), 	// still working when high
